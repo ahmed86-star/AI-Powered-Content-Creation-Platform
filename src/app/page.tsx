@@ -19,7 +19,6 @@ export default async function Home() {
   try {
     const response = await supabase.functions.invoke(
       "supabase-functions-get-plans",
-      { timeout: 10000 }, // Add timeout to prevent hanging
     );
 
     if (response.error) {
