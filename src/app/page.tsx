@@ -5,6 +5,7 @@ import Footer from "@/components/footer";
 import Link from "next/link";
 import { createClient } from "../../supabase/server";
 import { ArrowUpRight, CheckCircle2, Zap, Shield, Users } from "lucide-react";
+import { ErrorDisplay } from "@/components/error-display";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -12,9 +13,25 @@ export default async function Home() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: plans, error } = await supabase.functions.invoke(
-    "supabase-functions-get-plans",
-  );
+  let plans = [];
+  let fetchError = null;
+
+  try {
+    const response = await supabase.functions.invoke(
+      "supabase-functions-get-plans",
+      { timeout: 10000 }, // Add timeout to prevent hanging
+    );
+
+    if (response.error) {
+      console.error("Error fetching plans:", response.error);
+      fetchError = response.error;
+    } else {
+      plans = response.data || [];
+    }
+  } catch (error) {
+    console.error("Exception fetching plans:", error);
+    fetchError = error;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
@@ -183,22 +200,33 @@ export default async function Home() {
               Choose the perfect plan for your needs. No hidden fees. ✨
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {plans
-              ?.filter((item: any) => item.price !== 1500)
-              .map((item: any) => (
-                <PricingCard key={item.id} item={item} user={user} />
-              ))}
-            <div className="col-span-full text-center mt-6">
-              <p className="text-gray-600 italic">
-                Our premium plan is priced at $75/month to provide you with
-                unlimited access to our advanced AI content generation tools,
-                priority support, and exclusive templates - delivering
-                professional-grade content at a fraction of the cost of hiring a
-                copywriter.
-              </p>
+
+          {fetchError ? (
+            <div className="max-w-md mx-auto">
+              <ErrorDisplay
+                title="Unable to load pricing plans"
+                message="We're experiencing technical difficulties loading our pricing information. Please try again later."
+                className="mb-8"
+              />
             </div>
-          </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              {plans
+                ?.filter((item) => item.price !== 1500)
+                .map((item) => (
+                  <PricingCard key={item.id} item={item} user={user} />
+                ))}
+              <div className="col-span-full text-center mt-6">
+                <p className="text-gray-600 italic">
+                  Our premium plan is priced at $75/month to provide you with
+                  unlimited access to our advanced AI content generation tools,
+                  priority support, and exclusive templates - delivering
+                  professional-grade content at a fraction of the cost of hiring
+                  a copywriter.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
