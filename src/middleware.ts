@@ -1,52 +1,23 @@
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 export async function middleware(req: NextRequest) {
-  const res = NextResponse.next()
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return req.cookies.getAll().map(({ name, value }) => ({
-            name,
-            value,
-          }))
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            req.cookies.set(name, value)
-            res.cookies.set(name, value, options)
-          })
-        },
-      },
-    }
-  )
-
-  // Refresh session if expired - required for Server Components
-  const { data: { session }, error } = await supabase.auth.getSession()
-
-  if (error) {
-    // Auth session error handling without console.error
+  try {
+    // Create a simple response that just passes through
+    const res = NextResponse.next();
+    return res;
+  } catch (error) {
+    console.error("Middleware error:", error);
+    // Return a basic response to prevent 500 errors
+    return NextResponse.next();
   }
-
-  return res
 }
 
-// Ensure the middleware is only called for relevant paths
+// Limit middleware to only run on specific paths
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public (public files)
-     * - api/polar/webhook (webhook endpoints)
-     */
-    '/((?!_next/static|_next/image|favicon.ico|public|api/payments/webhook).*)',
+    // Only run on dashboard routes
+    "/dashboard/:path*",
   ],
-}
+};

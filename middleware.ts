@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function middleware(request: NextRequest) {
-  // Return NextResponse.next() for all requests
+export function middleware(req: NextRequest) {
+  // Simple pass-through middleware with no complex logic
   return NextResponse.next();
 }
 
-// Only run middleware on specific routes
+// Limit middleware to only run on specific paths
 export const config = {
-  matcher: ["/dashboard/:path*", "/api/:path*"],
+  matcher: [
+    // Only run on dashboard routes
+    "/dashboard/:path*",
+  ],
 };
