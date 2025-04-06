@@ -30,6 +30,7 @@ export default function Error({
             digest: error.digest,
             url: window.location.href,
             timestamp: new Date().toISOString(),
+            type: "server_component",
           }),
         });
       } catch (e) {
@@ -51,6 +52,11 @@ export default function Error({
         <h2 className="text-2xl font-bold">Something went wrong!</h2>
         <p className="text-muted-foreground">
           {error.message || "An error occurred while loading the page."}
+          {error.digest && (
+            <span className="block mt-2 text-xs font-mono bg-muted p-2 rounded">
+              Error digest: {error.digest}
+            </span>
+          )}
         </p>
         <div className="pt-4">
           <Button
