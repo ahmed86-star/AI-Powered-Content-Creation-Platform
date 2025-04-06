@@ -210,20 +210,30 @@ export default async function Home() {
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              {plans
-                ?.filter((item) => item.price !== 1500)
-                .map((item) => (
-                  <PricingCard key={item.id} item={item} user={user} />
-                ))}
-              <div className="col-span-full text-center mt-6">
-                <p className="text-gray-600 italic">
-                  Our premium plan is priced at $75/month to provide you with
-                  unlimited access to our advanced AI content generation tools,
-                  priority support, and exclusive templates - delivering
-                  professional-grade content at a fraction of the cost of hiring
-                  a copywriter.
-                </p>
-              </div>
+              {Array.isArray(plans) && plans.length > 0 ? (
+                <>
+                  {plans
+                    .filter((item) => item && item.price !== 1500)
+                    .map((item) => (
+                      <PricingCard key={item.id} item={item} user={user} />
+                    ))}
+                  <div className="col-span-full text-center mt-6">
+                    <p className="text-gray-600 italic">
+                      Our premium plan is priced at $75/month to provide you
+                      with unlimited access to our advanced AI content
+                      generation tools, priority support, and exclusive
+                      templates - delivering professional-grade content at a
+                      fraction of the cost of hiring a copywriter.
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <div className="col-span-full text-center">
+                  <p className="text-gray-600">
+                    No pricing plans available at the moment.
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
